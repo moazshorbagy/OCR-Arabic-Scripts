@@ -104,8 +104,7 @@ def extract_words_one_line(line):
     word_start = 0
     word_end = 0
     temp = 0
-    wordStartings = []
-    empty_line = line.shape[0]
+    words = []
     
     i = 0
     while i < hist.shape[0]:
@@ -126,13 +125,13 @@ def extract_words_one_line(line):
             if count > mean:
                 in_word = False
                 word_end = temp +1
-                wordStartings.append(line[:, word_start:word_end])                  
+                words.append(line[:, word_start:word_end])                  
             
             i = j - 1
         
         i += 1
        
-    return wordStartings
+    return words
 
 
 
