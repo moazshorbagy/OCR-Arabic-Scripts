@@ -7,6 +7,7 @@ from skimage.exposure import histogram
 from matplotlib.pyplot import bar
 from skimage.color import rgb2gray,rgb2hsv,hsv2rgb
 from skimage.transform import (hough_line, hough_line_peaks)
+from skimage.morphology import skeletonize
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
