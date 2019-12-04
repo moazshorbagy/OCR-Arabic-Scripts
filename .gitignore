@@ -103,6 +103,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# Visual Studio Code
+.vscode
+
 # project files
 scanned/
 text/
