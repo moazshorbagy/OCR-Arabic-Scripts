@@ -1,8 +1,4 @@
 from commonfunctions import *
-%matplotlib inline
-%load_ext autoreload
-%autoreload 2
-
 import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filters import threshold_otsu
@@ -20,21 +16,16 @@ def thresholding(img):
             else:
                 binary[i,j] = 0
     return binary
+
 def vertical_histogram(img):
-    histo = np.zeros(img.shape[1])
-    for i in range (img.shape[1]):
-        histo[i] = np.sum(img[:,i])
-    return histo
+    return np.sum(img, axis=0)
 
 def horizontal_histogram(img):
-    histo = np.zeros(img.shape[0])
-    for i in range (img.shape[0]):
-        histo[i] = np.sum(img[i,:])
-    return histo
+    return np.sum(img, axis=1)
 
-#############################################################################      
-def get_width_line(image):
-    line = thresholding(image)
+#############################################################################
+
+def get_width_line(line):
     v_histo = vertical_histogram(line)
     
     start =  0
@@ -52,6 +43,7 @@ def get_width_line(image):
     return start , end+1
         
 ##############################################################################
+
 def get_meanLength_spaces(v_hist):
     spacesLength = []
     
@@ -81,26 +73,26 @@ def get_meanLength_spaces(v_hist):
 
 #########################################################################
 
-def extract_lines(image):
-    
-    img = thresholding(image)
-        
-    lines = extract_words_one_line(image.transpose())
+def get_lines(image):
+    lines = []
 
-    LinesList = []
-    
-    for i in range(len(lines)-1):
-        lines[i] = lines[i].transpose()
-        
-        
-        s,e = get_width_line(lines[i])
-        
-        
-        LinesList.append(lines[i][:,s:e])
-    
-    LinesList =  np.asarray(LinesList)
-       
-    return LinesList
+    hist = horizontal_histogram(image)
+    indices = []
+    line_start = False
+    empty_line = image.shape[1] * 255
+    for i in range(image.shape[0]):
+        if not line_start and hist[i] != empty_line:
+            indices.append(i)
+            line_start = True
+
+        if line_start and hist[i] == empty_line:
+            indices.append(i)
+            line_start = False
+
+    for i in range(0, len(indices), 2):
+        lines.append(image[indices[i]:indices[i+1], :])
+
+    return lines
 
 ###########################################################################
 
@@ -110,7 +102,6 @@ def extract_words_one_line(line):
     v_hist = vertical_histogram(img)
     
     mean = get_meanLength_spaces(v_hist)
-    
 
     in_word = False
     word_start = 0
@@ -152,29 +143,21 @@ def extract_words_one_line(line):
     word_end = len(v_hist) 
     
     wordStartings.append(line[: , word_start:word_end])  
-    
-    
-
+       
     return wordStartings
-        
-
-    
-    
-    
-image = rgb2gray(io.imread('Dataset/capr2.png'))
-
-image2 =np.copy(image)
-
-Lines =  extract_lines(image)
-
-for i in range(len(Lines)):
-    show_images([Lines[i] ],[''])
-
-Words = extract_words_one_line(Lines[2])
-
-#THE WORDS IN THE LINE COMES IN REVERSE ORDER (LEFT TO RIGHT)
-
-for i in range(len(Words)):
-    show_images([Words[i] ],[''])
 
 
+
+if __name__=='__main__':
+
+    image = io.imread('scanned/capr2.png', as_gray=True)
+
+    lines = get_lines(image)
+
+    words = extract_words_one_line(lines[0])
+
+    # THE WORDS IN THE LINE COMES IN REVERSE ORDER (LEFT TO RIGHT)
+
+    for word in words:
+        io.imshow(word)
+        io.show()
