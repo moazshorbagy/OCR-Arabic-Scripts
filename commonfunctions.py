@@ -7,7 +7,7 @@ from skimage.exposure import histogram
 from matplotlib.pyplot import bar
 from skimage.color import rgb2gray,rgb2hsv,hsv2rgb
 from skimage.transform import (hough_line, hough_line_peaks)
-from skimage.morphology import skeletonize
+from skimage.morphology import skeletonize,binary_opening,dilation,erosion
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -15,7 +15,7 @@ import math
 
 
 # Convolution:
-from scipy.signal import convolve2d
+from scipy.signal import convolve2d,convolve
 from scipy import fftpack
 import math
 
@@ -42,18 +42,19 @@ def show_images(images,titles=None):
     n = 1
     for image,title in zip(images,titles):
         a = fig.add_subplot(1,n_ims,n)
-        if image.ndim == 2: 
+        if image.ndim == 2:
             plt.gray()
         plt.imshow(image)
         a.set_title(title)
         n += 1
     fig.set_size_inches(np.array(fig.get_size_inches()) * n_ims)
-    plt.show() 
+    plt.show()
 
 
 def showHist(img):
     # An "interface" to matplotlib.axes.Axes.hist() method
     plt.figure()
     imgHist = histogram(img, nbins=256)
-    
+
     bar(imgHist[1].astype(np.uint8), imgHist[0], width=0.8, align='center')
+    plt.show()
