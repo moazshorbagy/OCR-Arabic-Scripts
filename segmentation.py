@@ -132,12 +132,69 @@ def extract_words_one_line(line):
         i += 1
        
     return words
+###########################################################################
+
+
+def deskew(img):
+    image = rgb2gray(img)
+
+    #threshold to get rid of extraneous noise
+    thresh = threshold_otsu(image)
+    normalize = image > thresh
+
+    # gaussian blur
+    blur = gaussian(normalize, 3)
+
+    # canny edges in scikit-image
+    edges = canny(blur)
+
+    # hough lines
+    hough_lines = probabilistic_hough_line(edges)
+
+    # hough lines returns a list of points, in the form ((x1, y1), (x2, y2))
+    # representing line segments. the first step is to calculate the slopes of
+    # these lines from their paired point values
+    slopes = [(y2 - y1)/(x2 - x1) if (x2-x1) else 0 for (x1,y1), (x2, y2) in hough_lines]
+
+    # it just so happens that this slope is also y where y = tan(theta), the angle
+    # in a circle by which the line is offset
+    rad_angles = [np.arctan(x) for x in slopes]
+
+    # and we change to degrees for the rotation
+    deg_angles = [np.degrees(x) for x in rad_angles]
+
+    # which of these degree values is most common?
+    histo = np.histogram(deg_angles, bins=180)
+    
+    # correcting for 'sideways' alignments
+    rotation_number = histo[1][np.argmax(histo[0])]
+
+    if rotation_number > 45:
+        rotation_number = -(90-rotation_number)
+    elif rotation_number < -45:
+        rotation_number = 90 - abs(rotation_number)
+
+    return rotation_number
+
+###########################################################################
 
 
 
 if __name__=='__main__':
 
-    image = io.imread('scanned/capr3.png', as_gray=True)
+    img = io.imread('scanned/capr3.png', as_gray=True)
+	
+
+	
+	rotation_angle =  deskew(img)
+	
+	print('Rotation angle is {0}'.format(rotation_angle) + '\n')
+
+	image = tf.rotate(img,rotation_angle,cval=1)
+ 
+	show_images([image,img],['Rotated','Original'])
+	
+	#check if the function rotate returns the matrix between 0 and 1 or 0 and 255 
 
     lines = get_lines(image)
 
