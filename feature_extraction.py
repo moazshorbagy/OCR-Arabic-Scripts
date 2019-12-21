@@ -102,8 +102,22 @@ def f_multi_lbp(word, is_binarized=False):
     # Return a feature vector of 295 dimensions
     return np.concatenate((fullWordHist, upperLeftHist, upperRighttHist, lowerLeftHist, lowerRightHist))
 
-def f_ft():
-    pass
+#assumes the input img is binarized
+def f_ft(img):
+    filter = np.array([[0.1, 0.1, 0.1], [0.1, 0.2, 0.1], [0.1, 0.1, 0.1]])
+    word = np.array(convolve2d(img * 255, filter)).astype(int)
+    ft = np.fft.fft2(word)
+    ft = np.fft.fftshift(ft)
+    w, h = ft.shape
+    w = w // 2
+    h = h // 2
+    rw = w // 2
+    rh = h // 2
+    ft = ft[w - rw : w + rw, h - rh : h + rh]
+
+    # To reconstruct the signal:
+    # ift = np.fft.ifft2(ft).real
+    return ft
 
 # ==================== #
 # Statistical features #
