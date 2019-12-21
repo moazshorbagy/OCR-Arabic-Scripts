@@ -17,7 +17,7 @@ import numpy as np
 import os
 from skimage import transform as tf
 from skimage.color import rgb2gray
-
+# from seg_accuracy import get_total_img_word_seg_acc
 
 def thresholding(img):
     
@@ -113,7 +113,7 @@ def extract_words_one_line(line):
 
     hist = vertical_histogram(line)
 
-    mean = get_mean_space_length(hist)
+    # mean = get_mean_space_length(hist)
 
     in_word = False
     word_start = 0
@@ -137,7 +137,7 @@ def extract_words_one_line(line):
                 count += 1
                 j += 1
             
-            if count > mean:
+            if count >= 3:
                 in_word = False
                 word_end = temp +1
                 words.append(line[:, word_start:word_end])                  
@@ -194,28 +194,67 @@ def deskew(img):
 ###########################################################################
 
 
+def get_single_img_word_seg_acc(img, txtFileName):
+    num_words = 0
+    with open(txtFileName, 'r') as f:
+        num_words = len(f.read().split(' '))
+
+    lines = get_lines(img)
+
+    num_extracted_words = 0
+    for line in lines:
+        num_extracted_words += len(extract_words_one_line(line))
+
+    return (1 - abs(num_words - num_extracted_words) / num_words) * 100
+    
+# change img_sub_nam
+img_sub_name = lambda path, x: '%s/capr%d.png'%(path, (x+1))
+txt_sub_name = lambda path, x: '%s/capr%d.txt'%(path, (x+1))
+# calculates accuracy over the dataset from startIdx + 1 to endIdx
+
+def get_total_img_word_seg_acc(startIdx, endIdx, dataset_path, labels_path):
+    errors_in = []
+    total_acc = 0.0
+    for i in range(startIdx, endIdx):
+        name = img_sub_name(dataset_path, i)
+        txt_name = txt_sub_name(labels_path, i)
+        img = io.imread(name, as_gray=True)
+        rotation_angle = deskew(img)
+        deskewed_img = tf.rotate(img,rotation_angle,cval=1)
+        deskewed_img *= 255
+        sub_acc = get_single_img_word_seg_acc(deskewed_img, txt_name)
+        total_acc += sub_acc
+        if sub_acc < 100.0:
+            print(f'accuracy of capr#{i+1}: {sub_acc}')
+            errors_in.append(i + 1)
+    total_acc /= (endIdx - startIdx)
+    return total_acc, errors_in
+
+
 
 if __name__=='__main__':
 
-    img = io.imread('scanned/capr3.png', as_gray=True)
+    acc, errors_in = get_total_img_word_seg_acc(0, 10000, 'verification/scanned', 'verification/text')
+    print(acc)
+    # img = io.imread('scanned/capr3.png', as_gray=True)
 
-    rotation_angle = deskew(img)
+    # rotation_angle = deskew(img)
 
-    print('Rotation angle is {0}'.format(rotation_angle) + '\n')
+    # print('Rotation angle is {0}'.format(rotation_angle) + '\n')
 
-    image = tf.rotate(img,rotation_angle,cval=1)
+    # image = tf.rotate(img,rotation_angle,cval=1)
 
-    show_images([image,img],['Rotated','Original'])
+    # show_images([image,img],['Rotated','Original'])
 
-    #check if the function rotate returns the matrix between 0 and 1 or 0 and 255 
+    # #check if the function rotate returns the matrix between 0 and 1 or 0 and 255 
 
-    lines = get_lines(image)
+    # lines = get_lines(image)
 
-    words = extract_words_one_line(lines[0])
+    # words = extract_words_one_line(lines[0])
 
-    # THE WORDS IN THE LINE COMES IN REVERSE ORDER (LEFT TO RIGHT)
+    # # THE WORDS IN THE LINE COMES IN REVERSE ORDER (LEFT TO RIGHT)
 
-    for word in words:
-        # io.imshow(word, cmap=plt.cm.gray)
-        io.imshow(skeletonize(word))
-        io.show()
+    # for word in words:
+    #     # io.imshow(word, cmap=plt.cm.gray)
+    #     io.imshow(skeletonize(word))
+    #     io.show()
