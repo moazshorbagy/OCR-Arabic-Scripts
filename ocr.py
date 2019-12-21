@@ -2,6 +2,7 @@ from preprocessing import deskew, thresholding
 from segmentation import *
 from seg_accuracy import get_total_img_word_seg_acc
 from feature_extraction import f_get_holes, f_get_dots
+from utility import vertical_histogram
 import skimage.io as io
 import numpy as np
 
@@ -9,9 +10,9 @@ if __name__=='__main__':
 
     # Testing word segmentation for all images
 
-    acc, errors_in = get_total_img_word_seg_acc(0, 1500, 'scanned', 'text')
+    # acc, errors_in = get_total_img_word_seg_acc(0, 1500, 'scanned', 'text')
 
-    print(acc)
+    # print(acc)
 
     # Testing feature extraction
 
@@ -25,6 +26,20 @@ if __name__=='__main__':
     for line in lines:
         line = thresholding(line)
         words += extract_words_one_line(line)
+
+    io.imshow(words[0])
+    io.show()
+
+    io.imshow(lines[0])
+    io.show()
+
+    baseIndex = baseLine(lines[0])
+    hist = vertical_histogram(lines[0])
+    MFV = np.bincount(hist[hist!=0].astype('int64')).argmax()
+    cuts = cutPoints(words[0], None, lines[0], MFV, baseIndex)
+    for cut in cuts:
+        io.imshow(cut)
+        io.show()
 
     words1 = []
     for line in lines:

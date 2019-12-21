@@ -143,6 +143,7 @@ def maximumTransition(img,baseIndex):
     return mtIndex
 
 def cutPoints(word,MTI,line,MFV,baseIndex):
+    MTI = maximumTransition(word, baseIndex)
     Flag=True
     cuts=[]
     hist=vertical_histogram(word)
