@@ -130,6 +130,7 @@ def maximumTransition(img,baseIndex):
     for i in range(0,baseIndex+1):
         counter=0
         flag=False
+        print(i)
         for j in range(width):
             if img[i,j]==1 and flag==False:
                 counter+=1
@@ -139,11 +140,9 @@ def maximumTransition(img,baseIndex):
         if counter>max:
             mtIndex=i
             max=counter
-
     return mtIndex
 
 def cutPoints(word,MTI,line,MFV,baseIndex):
-    MTI = maximumTransition(word, baseIndex)
     Flag=True
     cuts=[]
     hist=vertical_histogram(word)
@@ -218,7 +217,13 @@ def cutPoints(word,MTI,line,MFV,baseIndex):
             Flag=False
 
     cuts=filteration(word,cuts,baseIndex,MTI,MFV,hist)
-    return cuts
+    char=[]
+    starting=0
+    for sr in cuts:
+        char.append(word[:,starting:sr.cutIndex+1])
+        starting=sr.cutIndex+1
+    char.append(word[:,starting:])
+    return char
 
 
 
@@ -238,12 +243,10 @@ def filteration(word,SRL,BaselineIndex,MaxTransitionsIndex,MFV,hist):
     while(i>0):
         horizontal=horizontal_histogram(word[:,SRL[i].startIndex:SRL[i].endIndex+1])
         if hist[SRL[i].cutIndex]==0:
-            print("1")
             filterdCut_1.insert(0,SRL[i])
             i-=1
 
         elif np.sum(word[BaselineIndex,SRL[i].startIndex+1:SRL[i].endIndex])==0:
-            print("3")
             if np.sum(horizontal[0:BaselineIndex])<np.sum(horizontal[BaselineIndex+1:]):
                 i-=1
             elif hist[SRL[i].cutIndex]<=MFV:
@@ -253,7 +256,6 @@ def filteration(word,SRL,BaselineIndex,MaxTransitionsIndex,MFV,hist):
                 i-=1
 
         elif np.sum(word[0:MaxTransitionsIndex+1,SRL[i].cutIndex])!=0:
-            print("2")
             i-=1
 
         else:
@@ -261,4 +263,3 @@ def filteration(word,SRL,BaselineIndex,MaxTransitionsIndex,MFV,hist):
             i-=1
 
     return filterdCut_1
-    

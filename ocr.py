@@ -16,7 +16,7 @@ if __name__=='__main__':
 
     # Testing feature extraction
 
-    original = io.imread('scanned/capr1.png', as_gray=True)
+    original = io.imread('../Dataset/scanned/capr1.png', as_gray=True)
 
     deskewed = deskew(original)
 
@@ -33,13 +33,16 @@ if __name__=='__main__':
     io.imshow(lines[0])
     io.show()
 
+    lines[0]=thresholding(lines[0])
     baseIndex = baseLine(lines[0])
     hist = vertical_histogram(lines[0])
     MFV = np.bincount(hist[hist!=0].astype('int64')).argmax()
-    cuts = cutPoints(words[0], None, lines[0], MFV, baseIndex)
+    MTI= maximumTransition(lines[0],baseIndex)
+    cuts = cutPoints(words[0], MTI, lines[0], MFV, baseIndex)
     for cut in cuts:
         io.imshow(cut)
         io.show()
+
 
     words1 = []
     for line in lines:
