@@ -2,16 +2,31 @@ from commonfunctions import *
 import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filters import threshold_otsu
+from skimage import data
+from skimage.filters import threshold_otsu
+
+
+#image processing resources
+from skimage.io import imread, imshow
+from skimage.filters import gaussian, threshold_otsu
+from skimage.feature import canny
+from skimage.transform import probabilistic_hough_line, rotate
+import math
+#testing 
+import numpy as np
+import os
+from skimage import transform as tf
+from skimage.color import rgb2gray
 
 
 def thresholding(img):
     
-    thresh = threshold_otsu(img)
+    # thresh = threshold_otsu(img)
     
     binary = np.copy(img)
 
-    binary[img < thresh] = 1
-    binary[img >= thresh] = 0
+    binary[img < 185] = 1
+    binary[img >= 185] = 0
     return binary
 
 def vertical_histogram(img):
@@ -183,18 +198,16 @@ def deskew(img):
 if __name__=='__main__':
 
     img = io.imread('scanned/capr3.png', as_gray=True)
-	
 
-	
-	rotation_angle =  deskew(img)
-	
-	print('Rotation angle is {0}'.format(rotation_angle) + '\n')
+    rotation_angle = deskew(img)
 
-	image = tf.rotate(img,rotation_angle,cval=1)
- 
-	show_images([image,img],['Rotated','Original'])
-	
-	#check if the function rotate returns the matrix between 0 and 1 or 0 and 255 
+    print('Rotation angle is {0}'.format(rotation_angle) + '\n')
+
+    image = tf.rotate(img,rotation_angle,cval=1)
+
+    show_images([image,img],['Rotated','Original'])
+
+    #check if the function rotate returns the matrix between 0 and 1 or 0 and 255 
 
     lines = get_lines(image)
 
