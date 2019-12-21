@@ -1,5 +1,6 @@
-from scipy.ndimage import label
 import cv2
+import numpy as np
+from scipy.ndimage import label
 
 # =================== #
 # Structural features #
@@ -8,7 +9,7 @@ import cv2
 def f_get_holes(word):
     contours, _ = cv2.findContours(word, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     _, n = label(word)
-    return len(contours) - n
+    return max(0, len(contours) - n)
 
 def f_get_dots(word):
     contours, _ = cv2.findContours(word, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)

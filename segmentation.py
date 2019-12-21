@@ -1,41 +1,5 @@
-from commonfunctions import *
-import matplotlib.pyplot as plt
-from skimage import data
-from skimage.filters import threshold_otsu
-from skimage import data
-from skimage.filters import threshold_otsu
-
-
-#image processing resources
-from skimage.io import imread, imshow
-from skimage.filters import gaussian, threshold_otsu
-from skimage.feature import canny
-from skimage.transform import probabilistic_hough_line, rotate
-import math
-#testing 
+from utility import vertical_histogram, horizontal_histogram
 import numpy as np
-import os
-from skimage import transform as tf
-from skimage.color import rgb2gray
-# from seg_accuracy import get_total_img_word_seg_acc
-
-def thresholding(img):
-    
-    # thresh = threshold_otsu(img)
-    
-    binary = np.copy(img)
-
-    binary[img < 185] = 1
-    binary[img >= 185] = 0
-    return binary
-
-def vertical_histogram(img):
-    return np.sum(img, axis=0)
-
-def horizontal_histogram(img):
-    return np.sum(img, axis=1)
-
-#############################################################################
 
 def get_width_line(line):
     v_histo = vertical_histogram(line)
@@ -91,13 +55,13 @@ def get_lines(image):
     indices = []
     line_start = False
     empty_line = image.shape[1] * 255
-    for i in range(hist.shape[0]):
+    for i in range(hist.shape[0] - 2):
         if not line_start and hist[i] != empty_line:
             indices.append(i)
             line_start = True
             continue
 
-        if line_start and hist[i] == empty_line:
+        if line_start and hist[i] == empty_line and hist[i+1] == empty_line and hist[i+2] == empty_line:
             indices.append(i)
             line_start = False
 
@@ -108,8 +72,8 @@ def get_lines(image):
 
 ###########################################################################
 
+# line must be negative (and thresholded)
 def extract_words_one_line(line):
-    line = thresholding(line)
 
     hist = vertical_histogram(line)
 
@@ -147,114 +111,3 @@ def extract_words_one_line(line):
         i += 1
        
     return words
-###########################################################################
-
-
-def deskew(img):
-    image = rgb2gray(img)
-
-    #threshold to get rid of extraneous noise
-    thresh = threshold_otsu(image)
-    normalize = image > thresh
-
-    # gaussian blur
-    blur = gaussian(normalize, 3)
-
-    # canny edges in scikit-image
-    edges = canny(blur)
-
-    # hough lines
-    hough_lines = probabilistic_hough_line(edges)
-
-    # hough lines returns a list of points, in the form ((x1, y1), (x2, y2))
-    # representing line segments. the first step is to calculate the slopes of
-    # these lines from their paired point values
-    slopes = [(y2 - y1)/(x2 - x1) if (x2-x1) else 0 for (x1,y1), (x2, y2) in hough_lines]
-
-    # it just so happens that this slope is also y where y = tan(theta), the angle
-    # in a circle by which the line is offset
-    rad_angles = [np.arctan(x) for x in slopes]
-
-    # and we change to degrees for the rotation
-    deg_angles = [np.degrees(x) for x in rad_angles]
-
-    # which of these degree values is most common?
-    histo = np.histogram(deg_angles, bins=180)
-    
-    # correcting for 'sideways' alignments
-    rotation_number = histo[1][np.argmax(histo[0])]
-
-    if rotation_number > 45:
-        rotation_number = -(90-rotation_number)
-    elif rotation_number < -45:
-        rotation_number = 90 - abs(rotation_number)
-
-    return rotation_number
-
-###########################################################################
-
-
-def get_single_img_word_seg_acc(img, txtFileName):
-    num_words = 0
-    with open(txtFileName, 'r') as f:
-        num_words = len(f.read().split(' '))
-
-    lines = get_lines(img)
-
-    num_extracted_words = 0
-    for line in lines:
-        num_extracted_words += len(extract_words_one_line(line))
-
-    return (1 - abs(num_words - num_extracted_words) / num_words) * 100
-    
-# change img_sub_nam
-img_sub_name = lambda path, x: '%s/capr%d.png'%(path, (x+1))
-txt_sub_name = lambda path, x: '%s/capr%d.txt'%(path, (x+1))
-# calculates accuracy over the dataset from startIdx + 1 to endIdx
-
-def get_total_img_word_seg_acc(startIdx, endIdx, dataset_path, labels_path):
-    errors_in = []
-    total_acc = 0.0
-    for i in range(startIdx, endIdx):
-        name = img_sub_name(dataset_path, i)
-        txt_name = txt_sub_name(labels_path, i)
-        img = io.imread(name, as_gray=True)
-        rotation_angle = deskew(img)
-        deskewed_img = tf.rotate(img,rotation_angle,cval=1)
-        deskewed_img *= 255
-        sub_acc = get_single_img_word_seg_acc(deskewed_img, txt_name)
-        total_acc += sub_acc
-        if sub_acc < 100.0:
-            print(f'accuracy of capr#{i+1}: {sub_acc}')
-            errors_in.append(i + 1)
-    total_acc /= (endIdx - startIdx)
-    return total_acc, errors_in
-
-
-
-if __name__=='__main__':
-
-    acc, errors_in = get_total_img_word_seg_acc(0, 10000, 'verification/scanned', 'verification/text')
-    print(acc)
-    # img = io.imread('scanned/capr3.png', as_gray=True)
-
-    # rotation_angle = deskew(img)
-
-    # print('Rotation angle is {0}'.format(rotation_angle) + '\n')
-
-    # image = tf.rotate(img,rotation_angle,cval=1)
-
-    # show_images([image,img],['Rotated','Original'])
-
-    # #check if the function rotate returns the matrix between 0 and 1 or 0 and 255 
-
-    # lines = get_lines(image)
-
-    # words = extract_words_one_line(lines[0])
-
-    # # THE WORDS IN THE LINE COMES IN REVERSE ORDER (LEFT TO RIGHT)
-
-    # for word in words:
-    #     # io.imshow(word, cmap=plt.cm.gray)
-    #     io.imshow(skeletonize(word))
-    #     io.show()

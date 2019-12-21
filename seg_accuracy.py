@@ -1,6 +1,6 @@
-from segmentation import extract_words_one_line, get_lines, deskew
+from segmentation import extract_words_one_line, get_lines
+from preprocessing import deskew, thresholding
 import skimage.io as io
-from skimage import transform as tf
 
 def get_single_img_word_seg_acc(img, txtFileName):
     num_words = 0
@@ -11,7 +11,7 @@ def get_single_img_word_seg_acc(img, txtFileName):
 
     num_extracted_words = 0
     for line in lines:
-        num_extracted_words += len(extract_words_one_line(line))
+        num_extracted_words += len(extract_words_one_line(thresholding(line)))
 
     return (1 - abs(num_words - num_extracted_words) / num_words) * 100
     
@@ -27,9 +27,7 @@ def get_total_img_word_seg_acc(startIdx, endIdx, dataset_path, labels_path):
         name = img_sub_name(dataset_path, i)
         txt_name = txt_sub_name(labels_path, i)
         img = io.imread(name, as_gray=True)
-        rotation_angle = deskew(img)
-        deskewed_img = tf.rotate(img,rotation_angle,cval=1)
-        deskewed_img *= 255
+        deskewed_img = deskew(img)
         sub_acc = get_single_img_word_seg_acc(deskewed_img, txt_name)
         total_acc += sub_acc
         if sub_acc < 100.0:
