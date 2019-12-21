@@ -1,5 +1,5 @@
 from segmentation import extract_words_one_line, get_lines, deskew
-import skimage as io
+import skimage.io as io
 from skimage import transform as tf
 
 def get_single_img_word_seg_acc(img, txtFileName):
