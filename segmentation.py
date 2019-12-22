@@ -312,7 +312,6 @@ def get_char_from_word(word, line, isThresholded=False):
 
 
 
-
 def detect_seen(img ):
 
     new = np.copy(img)
@@ -326,16 +325,14 @@ def detect_seen(img ):
     ] 
 
     middleofWord_SE = [
-        #[0,1,0,0,0,1,1,0,0,0,1],
-        #[0,1,x,0,0,1,1,0,0,0,1],
+
         [1,1,1,0,0,1,1,0,0,1,1],
         [1,0,1,1,1,0,1,1,1,0,0],
 
     ]
     
     middleofWord_SE2 = [
-        #[0,1,0,0,0,1,1,0,0,0,1],
-        #[0,1,x,0,0,1,1,0,0,0,1],
+
         [1,1,1,0,0,1,1,0,0,1,1],
         [1,0,1,1,1,0,0,1,1,0,0],
 
@@ -350,15 +347,13 @@ def detect_seen(img ):
 
     ]
     middleofWord_SE4 = [
-        #[0,1,0,0,0,1,1,0,0,0,1],
-        #[0,1,x,0,0,1,1,0,0,0,1],
+
         [1,1,1,0,0,1,1,0,0,1,1],
         [1,0,1,1,1,0,1,1,1,1,0],
 
     ]
     middleofWord_SE5 = [
-        #[0,1,0,0,0,1,1,0,0,0,1],
-        #[0,1,x,0,0,1,1,0,0,0,1],
+
         [1,1,1,0,0,1,1,0,0,1,0],
         [1,0,1,1,1,0,1,1,1,1,1],
 
@@ -406,29 +401,12 @@ def detect_seen(img ):
                 valid = True
                 checkend = False
 
-    '''else:
-         #for start of word
-        for i in range(new.shape[0]-startofWord_SE.shape[0]+1):
-            for j in range(new.shape[1]-startofWord_SE.shape[1]+1):
-                new2 = np.copy(new[i : i+startofWord_SE.shape[0] , j :   j+startofWord_SE.shape[1]])
-                #print(new2,'\n')
-                new2[0,startofWord_SE.shape[1]-2] = 0
-                #print(new2,'\n................................................................')
-                #io.imshow(new2/1.0)
-                #io.show()
-                #[ i : i+startofWord_SE.shape[0] , j :   j+startofWord_SE.shape[1]]
-                check = np.array_equal(new2, startofWord_SE)
-                if check == True:
-                    print('in')
-                    start.append(j)
-                    end.append(j + startofWord_SE.shape[1])
-                    count+=1
-                    valid = True
-                    check = False
-    '''
+
+    locations  = [] 
     images = []
     if valid == True:
 
+        loc = 0
         
         start.sort()
         end.sort()
@@ -437,26 +415,29 @@ def detect_seen(img ):
 
         if start[0] > 1:
             images.append(np.copy(new[:,0:start[0]-1]))
+            loc+=1
 
 
         for i in range(len(start)):
-                #print(valid, count, start, end)
 
                 images.append(np.copy(new[:,start[i]:end[i]]))
+                locations.append(loc)
+                loc+=1
 
                 if i < len(start)-1:
                 
                     if start[i+1] != end[i]+1:
                         images.append(np.copy(new[:,end[i]+1:start[i+1]-1]))
-        #check if working
+                        loc+=1
+
         if end[len(end)-1] < new.shape[1]-2 :
             images.append(np.copy(new[:,end[len(end)-1]:new.shape[1]]))
-                
+        
     else:
         images.append(new)
 
 
 
-    return images , valid#, count , start ,end
+    return images , locations 
 
 #################################################################	
