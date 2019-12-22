@@ -1,4 +1,5 @@
 from utility import vertical_histogram, horizontal_histogram
+from feature_extraction import cut_extra_height, cut_extra_width
 import numpy as np
 
 def get_width_line(line):
@@ -232,6 +233,8 @@ def cutPoints(word,MTI,line,MFV,baseIndex):
 def remove_strokes(chars, baseIndex):
     filtered = []
     for char in chars:
+        char = cut_extra_height(char)
+        char = cut_extra_width(char)
         if(char.shape[1] > 14):
             v_hist = vertical_histogram(char[:,2:-2])
             min_value = np.min(v_hist)
