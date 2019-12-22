@@ -249,7 +249,7 @@ def get_char_images_pred(img_path='scanned/capr1.png'):
 
     for i in range(len(linesWithWords)): # looping on lines
         for j in range(len(linesWithWords[i])): # looping on words in specific line
-            wrods.append(get_char_from_word(linesWithWords[i][j], lines[i], True))
+            words.append(get_char_from_word(linesWithWords[i][j], lines[i], True))
 
     return words
 
