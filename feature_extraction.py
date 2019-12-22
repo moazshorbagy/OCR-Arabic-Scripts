@@ -58,7 +58,7 @@ def f_min_y():
 # a boolean parameter indicates whether the image is in grayscale or binarized
 # word images should be of fixed size (28x20) in the paper
 
-def get_circular_lbp(word, is_binarized=False):
+def get_circular_lbp(word, nbins, is_binarized=False):
     if is_binarized:
         # This filter transforms a binarized image into a gray scal one
         filter = np.array([[0.1, 0.1, 0.1], [0.1, 0.2, 0.1], [0.1, 0.1, 0.1]])
@@ -81,13 +81,12 @@ def get_circular_lbp(word, is_binarized=False):
 
     # Get a histogram of 59 bins
     lbps = np.array(lbps)
-    hist, _ = np.histogram(lbps, bins=10)
+    hist, _ = np.histogram(lbps, bins=nbins)
     return hist
 
-def f_multi_lbp(word, is_binarized=False):
+def f_multi_lbp(word, is_binarized=False, nbins=10):
     #get full word image lbp
-    fullWordHist = get_circular_lbp(word, is_binarized)
-
+    fullWordHist = get_circular_lbp(word, nbins, is_binarized)
     #compute lbp for 4 quarters of the image
     w, h = word.shape
     upperLeft = word[0 : w // 2, 0 : h // 2]
@@ -95,10 +94,10 @@ def f_multi_lbp(word, is_binarized=False):
     lowerLeft= word[0 : w // 2, h // 2 : h]
     lowerRight = word[w // 2 : w, h // 2 : h]
 
-    upperLeftHist = get_circular_lbp(upperLeft, is_binarized)
-    upperRighttHist = get_circular_lbp(upperRight, is_binarized)
-    lowerLeftHist = get_circular_lbp(lowerLeft, is_binarized)
-    lowerRightHist = get_circular_lbp(lowerRight, is_binarized)
+    upperLeftHist = get_circular_lbp(upperLeft, nbins, is_binarized)
+    upperRighttHist = get_circular_lbp(upperRight, nbins, is_binarized)
+    lowerLeftHist = get_circular_lbp(lowerLeft, nbins, is_binarized)
+    lowerRightHist = get_circular_lbp(lowerRight, nbins, is_binarized)
     # Return a feature vector of 295 dimensions
     return np.concatenate((fullWordHist, upperLeftHist, upperRighttHist, lowerLeftHist, lowerRightHist))
 
@@ -108,13 +107,12 @@ def f_ft(img):
     word = np.array(convolve2d(img * 255, filter)).astype(int)
     ft = np.fft.fft2(word)
     ft = np.fft.fftshift(ft)
-    w, h = ft.shape
+    h, w = ft.shape
     w = w // 2
     h = h // 2
-    rw = w // 2
-    rh = h // 2
-    ft = ft[w - rw : w + rw, h - rh : h + rh]
-
+    ft = ft[h - 2 : h + 2, w - 2 : w + 2]
+    h, w = ft.shape
+    ft = np.reshape(ft, (h * w,))
     # To reconstruct the signal:
     # ift = np.fft.ifft2(ft).real
     return ft
@@ -142,3 +140,18 @@ def f_vertical_crossings():
 
 def f_horizontal_crossings():
     pass
+
+
+# ==================== #
+#   Get all features   #
+# ==================== #
+
+def get_features(char, use_ft_lbp=False):
+    holes = np.array([f_get_holes(char)])
+    dots = np.array([f_get_dots(char)])
+    features = np.concatenate((holes, dots))
+    if use_ft_lbp:
+        lbp = np.array(f_multi_lbp(char, is_binarized=True, nbins=10))
+        ft = np.array(f_ft(char))
+        features = np.concatenate((features, ft, lbp))
+    return features

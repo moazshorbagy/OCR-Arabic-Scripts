@@ -2,9 +2,12 @@
 import cv2
 import numpy as np
 from skimage.color import rgb2gray
+import skimage.io as io
 from skimage.filters import gaussian, threshold_otsu
 from skimage.feature import canny
 from skimage.transform import probabilistic_hough_line, rotate
+from feature_extraction import f_get_dots, f_get_holes, f_ft, f_multi_lbp, get_features
+from classification import *
 
 # ========== #
 # De-skewing #
@@ -212,9 +215,10 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
             
                 for k in range(len(chars)):
                     labels.append(chars[k])
-                    data.append(labelWords[currLabelIndex][k])
+                    data.append(map_char(labelWords[currLabelIndex][k]))
 
     print(f'got {end-start} images in: {int(time() - was)} sec')
+    # with open('dataset/d')
     return data, labels, segErrors
 
 def save_predictions(predictions, path):
@@ -254,3 +258,57 @@ X = get_char_images_pred('scanned/capr2.png')
 for x in X:
     io.imshow(x)
     io.show()
+
+def save_char_imgs(data, path):
+    k = 0
+    for char in data:
+        io.imsave(path + '/capr' + str(k) + '.png', char/1.0)
+        k += 1
+
+def save_labels(labels):
+    with open('labels.txt', 'w') as f:
+        for i in range(len(labels)):
+            f.write(str(labels[i]))
+            if i < len(labels) - 1:
+                f.write('\n')
+
+# Takes path of directories containing character images and other for their labels
+# Returns features array NxM and labels Nx1
+# N = number of data
+# M = number of features
+def save_features(chars_path, start, end):
+    # get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000)
+    char_imgs = os.listdir(chars_path)
+    char_imgs.sort()
+    features_path = 'features.txt'
+    with open(features_path, 'w') as f:
+        for i in range(len(char_imgs)):
+            path = os.path.join(chars_path, char_imgs[i])
+            char = io.imread(path, as_gray=True)
+            features = get_features(char)
+            print(features)
+            for j in range(len(features)):
+                if j < len(features) - 1:
+                    f.write(str(features[j]) + ' ')
+                else:
+                    f.write(str(features[j]))
+            if i < len(char_imgs) - 1:
+                f.write('\n')
+
+
+
+def load_dataset(features_file, labels_file):
+    features = []
+    with open(features_file, 'r') as f:
+        lines = f.read().split('\n')
+        for line in lines:
+            features.append(line.split(' '))
+    features = np.asarray(features).astype(np.uint8)
+    
+    labels = []
+    with open(labels_file, 'r') as f:
+        lines = np.array([f.read().split('\n')])
+        for line in lines:
+            labels.append(line)
+    labels = np.asarray(labels).astype(np.uint8)
+    return features, labels[0]

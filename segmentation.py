@@ -307,3 +307,156 @@ def get_char_from_word(word, line, isThresholded=False):
     chars = cutPoints(word, MTI, line, MFV, baseIndex)
     chars.reverse()
     return chars
+	
+############################################################
+
+
+
+
+def detect_seen(img ):
+
+    new = np.copy(img)
+
+    endofWord_SE = [
+        [1,0,0,0,1,0,0,0,1],
+        [1,1,0,1,1,1,0,0,1],
+        [1,1,1,1,0,1,1,1,0],
+        [1,0,0,0,0,0,0,0,0],
+
+    ] 
+
+    middleofWord_SE = [
+        #[0,1,0,0,0,1,1,0,0,0,1],
+        #[0,1,x,0,0,1,1,0,0,0,1],
+        [1,1,1,0,0,1,1,0,0,1,1],
+        [1,0,1,1,1,0,1,1,1,0,0],
+
+    ]
+    
+    middleofWord_SE2 = [
+        #[0,1,0,0,0,1,1,0,0,0,1],
+        #[0,1,x,0,0,1,1,0,0,0,1],
+        [1,1,1,0,0,1,1,0,0,1,1],
+        [1,0,1,1,1,0,0,1,1,0,0],
+
+
+    ]
+
+    middleofWord_SE3 = [
+        #[0,1,0,0,0,1,1,0,0,0,1],
+        #[0,1,x,0,0,1,1,0,0,0,1],
+        [1,1,1,0,0,1,1,0,0,1,0],
+        [1,0,1,1,1,0,1,1,1,1,0],
+
+    ]
+    middleofWord_SE4 = [
+        #[0,1,0,0,0,1,1,0,0,0,1],
+        #[0,1,x,0,0,1,1,0,0,0,1],
+        [1,1,1,0,0,1,1,0,0,1,1],
+        [1,0,1,1,1,0,1,1,1,1,0],
+
+    ]
+    middleofWord_SE5 = [
+        #[0,1,0,0,0,1,1,0,0,0,1],
+        #[0,1,x,0,0,1,1,0,0,0,1],
+        [1,1,1,0,0,1,1,0,0,1,0],
+        [1,0,1,1,1,0,1,1,1,1,1],
+
+    ]
+    
+    middleofWord_SE=np.asarray(middleofWord_SE)
+    middleofWord_SE2=np.asarray(middleofWord_SE2)
+    middleofWord_SE3=np.asarray(middleofWord_SE3)
+    middleofWord_SE4=np.asarray(middleofWord_SE4)
+    middleofWord_SE5=np.asarray(middleofWord_SE5)
+    endofWord_SE = np.asarray(endofWord_SE)
+
+    start = []
+    end = []
+    valid = False
+    count = 0 
+
+    for i in range(8,new.shape[0]-middleofWord_SE.shape[0]+1):
+        for j in range(new.shape[1]-middleofWord_SE.shape[1]+1):
+
+            check1 = np.array_equal(new[ i : i+middleofWord_SE.shape[0] , j :   j+middleofWord_SE.shape[1]], middleofWord_SE)
+            check3 = np.array_equal(new[ i : i+middleofWord_SE3.shape[0] , j :   j+middleofWord_SE3.shape[1]], middleofWord_SE3)
+            check2 = np.array_equal(new[ i : i+middleofWord_SE2.shape[0] , j :   j+middleofWord_SE2.shape[1]], middleofWord_SE2)
+            check4 = np.array_equal(new[ i : i+middleofWord_SE4.shape[0] , j :   j+middleofWord_SE4.shape[1]], middleofWord_SE4)
+            check5 = np.array_equal(new[ i : i+middleofWord_SE5.shape[0] , j :   j+middleofWord_SE5.shape[1]], middleofWord_SE5)
+            checkend = np.array_equal(new[ i : i+endofWord_SE.shape[0] , j :   j+endofWord_SE.shape[1]], endofWord_SE)
+            if check3 == True or check2 == True or check1 == True or check4 == True or check5 == True:
+
+                start.append(j)
+                end.append(j + middleofWord_SE.shape[1])
+                count+=1
+                valid = True
+                check1 = False
+                check2 = False
+                check3 = False
+                check4 = False
+                check5 = False
+            
+            elif checkend ==True:
+                print('in 3')
+                
+                start.append(j-8)
+                end.append(j + middleofWord_SE.shape[1]-1)
+                count+=1
+                valid = True
+                checkend = False
+
+    '''else:
+         #for start of word
+        for i in range(new.shape[0]-startofWord_SE.shape[0]+1):
+            for j in range(new.shape[1]-startofWord_SE.shape[1]+1):
+                new2 = np.copy(new[i : i+startofWord_SE.shape[0] , j :   j+startofWord_SE.shape[1]])
+                #print(new2,'\n')
+                new2[0,startofWord_SE.shape[1]-2] = 0
+                #print(new2,'\n................................................................')
+                #io.imshow(new2/1.0)
+                #io.show()
+                #[ i : i+startofWord_SE.shape[0] , j :   j+startofWord_SE.shape[1]]
+                check = np.array_equal(new2, startofWord_SE)
+                if check == True:
+                    print('in')
+                    start.append(j)
+                    end.append(j + startofWord_SE.shape[1])
+                    count+=1
+                    valid = True
+                    check = False
+    '''
+    images = []
+    if valid == True:
+
+        
+        start.sort()
+        end.sort()
+
+        print(start,end)
+
+        if start[0] > 1:
+            images.append(np.copy(new[:,0:start[0]-1]))
+
+
+        for i in range(len(start)):
+                #print(valid, count, start, end)
+
+                images.append(np.copy(new[:,start[i]:end[i]]))
+
+                if i < len(start)-1:
+                
+                    if start[i+1] != end[i]+1:
+                        images.append(np.copy(new[:,end[i]+1:start[i+1]-1]))
+        #check if working
+        if end[len(end)-1] < new.shape[1]-2 :
+            images.append(np.copy(new[:,end[len(end)-1]:new.shape[1]]))
+                
+    else:
+        images.append(new)
+
+
+
+    return images , valid#, count , start ,end
+
+#################################################################	
