@@ -1,74 +1,33 @@
-from preprocessing import deskew, thresholding, get_char_images
+from preprocessing import *
 from segmentation import get_lines, extract_words_one_line, get_char_from_word, remove_strokes, baseLine
 from seg_accuracy import get_total_img_word_seg_acc
-from feature_extraction import f_get_holes, f_get_dots
+from feature_extraction import f_get_holes, f_get_dots, f_center_of_mass
 from utility import vertical_histogram
 import skimage.io as io
 import numpy as np
+from classification import *
 
 if __name__=='__main__':
 
-    # Testing word segmentation for all images
+    flag=False
+    modelPath="zaki.sav"
+    image="verification/scanned/capr6.png"
+    if flag:
+        model=load_model(modelPath)
+        chars = get_char_images_pred(image)
+        X_test=[]
+        for char in data:
+            X_test.append(get_features(char, False))
+        
+    else:
+        data, labels, errors = get_char_images('verification/scanned', 'verification/text', 1, 2)
+        features = []
+        for char in data:
+            features.append(get_features(char, False))
+        X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size = 0.2, random_state = 0)
+        model = build_model(X_train,y_train)
+        save_model(model,modelPath)
 
-    # acc, errors_in = get_total_img_word_seg_acc(0, 1500, 'scanned', 'text')
-
-    # print(acc)
-
-    # Testing character segmentation
-
-    data, labels, errors = get_char_images('scanned', 'text', 0, 20)
-    errorCount = 0
-    for _, word, _, _ in errors:
-        errorCount += len(word)
-    print(len(labels), errorCount)
-    seg_accuracy = (100 * len(labels)) // (len(labels) + errorCount)
-    print(f'Segmentation Accuracy: {seg_accuracy}')
+    predictions = model.predict(X_test)
     
-    # for path, word, line, column in errors:
-    #     print(word, line, column)
-
-    # for i in range(len(data)):
-    #     print(data[i])
-    #     io.imshow(labels[i])
-    #     io.show()
-
-    # Testing feature extraction
-
-    original = io.imread('scanned/capr10.png', as_gray=True)
-
-    deskewed = deskew(original)
-
-    lines = get_lines(deskewed)
-
-    thresholded_lines = []
-    for line in lines:
-        thresholded_lines.append(thresholding(line))
-    
-    words = []
-    for line in thresholded_lines:
-        words += extract_words_one_line(line)
-    
-    baseIndex = baseLine(lines[0])
-    for i in range(15):
-        chars = get_char_from_word(words[i], thresholded_lines[0], True)
-        chars = remove_strokes(chars, baseIndex)
-        for char in chars:
-            io.imshow(char)
-            io.show()
-
-    words1 = []
-    for line in lines:
-        line = thresholding(line, 210)
-        words1 += extract_words_one_line(line)
-
-    words2 = []
-    for line in lines:
-        line = thresholding(line, 125)
-        words2 += extract_words_one_line(line)
-
-    # THE WORDS IN THE LINE COMES IN REVERSE ORDER (LEFT TO RIGHT)
-    for i in range(len(words)):
-        print(f'Number of dots = {f_get_dots(words2[i])}')
-        print(f'Number of holes = {f_get_holes(words1[i])}')
-        io.imshow(words[i]/1.0)
-        io.show()
+    save_predictions(predictions,"test/capr6.txt")
