@@ -140,6 +140,61 @@ def f_vertical_crossings():
 
 def f_horizontal_crossings():
     pass
+	
+	
+#############################
+##     YAMINA PAPER        ##
+#############################
+
+def cut_extra_height(img):
+    histo = np.sum(img, axis=1)
+    count = 0
+    count1 = 0
+    for i in range(len(histo)):
+        if histo[i] == 0:
+            count +=1
+        else:
+            break
+
+    for i in range(len(histo)-1, 0,-1):
+        if histo[i] == 0:
+            count1 +=1
+        else: 
+            break
+    return img[count : img.shape[0]-count1 , :]
+
+
+
+def f_w_over_h(img):
+    new  = cut_extra_height(img)
+    return new.shape[1]/new.shape[0]
+
+
+def f_bpixels_over_wpixels(img):
+    num_zeros = np.count_nonzero(img == 0)
+    num_ones = np.count_nonzero(img == 1)
+    return num_zeros/num_ones 
+
+def f_horizontal_transitions(img):
+    count = 0
+    for i in range(img.shape[0]):
+        prev = img[i,0]
+        for  j in range(img.shape[1]):
+            if img[i,j] != prev:
+                prev = img[i,j]
+                count+=1
+    return count 
+
+
+def f_vertical_transitions(img):
+    count = 0
+    for i in range(img.shape[1]):
+        prev = img[0,i]
+        for  j in range(img.shape[0]):
+            if img[j,i] != prev:
+                prev = img[j,i]
+                count+=1
+    return count 
 
 
 # ==================== #
