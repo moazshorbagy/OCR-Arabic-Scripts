@@ -3,13 +3,14 @@
 # ===================== #
 from preprocessing import *
 import numpy as np
-# from keras.utils import np_utils
-# from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder
 
-# data, labels, errors = get_char_images('verification/scanned', 'verification/text', 0, 1)
-# save_char_imgs(labels, 'chars')
-# save_labels(data)
-# save_features('chars', 0, 5628)
+data, labels, errors = get_char_images('verification/scanned', 'verification/text', 1, 2)
+save_labels(labels)
+features = []
+for char in data:
+    features.append(get_features(char, False))
+# save_features(features)
 
 X, Y = load_dataset('features.txt', 'labels.txt')
 
@@ -21,9 +22,10 @@ X, Y = load_dataset('features.txt', 'labels.txt')
 #         labels.append(label)
 #     labels = np.asarray(labels)
 #     return labels
-# Y = shape_labels(Y)
-# Y = np_utils.to_categorical(Y)
-# print(Y[0,:])
+# #Y = shape_labels(LabelEncoder(Y))
+# encode=LabelEncoder()
+# encode.fit(Y)
+# Y = np_utils.to_categorical(encode.transform(Y))
 
 # chars = []
 
@@ -44,8 +46,11 @@ pca = PCA(n_components = 20)
 
 
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size = 0.35, random_state = 0)
-
+# X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size = 0.2, random_state = 0)
+X_train = X[0:4000]
+X_test = X[4000:]
+y_train = Y[0:4000]
+y_test = Y[4000:]
 # =========================== #
 # Building Model and Training #
 # =========================== #
@@ -68,9 +73,15 @@ clfMLP = MLPRegressor(hidden_layer_sizes=(6, 6))
 
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score
-clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15,15), random_state=1, max_iter=10000)
-clf.fit(X_train, y_train)
-y_predicted = clf.predict(X_test)
-print(y_predicted[0])
-print(y_test[0])
-print(accuracy_score(y_test, y_predicted))
+import pickle
+def build_model(X_train, y_train):
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15,15), random_state=1, max_iter=10000)
+    clf.fit(X_train, y_train)
+    return clf
+
+def save_model(model,filename):
+    pickle.dump(model, open(filename, 'wb'))
+
+
+def load_model(filename):
+    return pickle.load(open(filename, 'rb'))
