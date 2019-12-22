@@ -132,7 +132,6 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
     txts.sort()
 
     segErrors = []
-    labelWords = []
     data = []
     labels = []
     was = time()
@@ -140,6 +139,7 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
     for i in range(start, end):        
         # Getting labels
         path = os.path.join(txt_path, txts[i])
+        labelWords = []
         with open(path, 'r') as f:
             words = f.read().split(' ')
             for word in words:
@@ -178,7 +178,7 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
 
                 # Check for character segmentation error
                 if(len(chars) != len(labelWords[currLabelIndex])):
-                    segErrors.append((labelWords[currLabelIndex], i, j))
+                    segErrors.append((path, labelWords[currLabelIndex], i, j))
                     continue
             
                 for k in range(len(chars)):

@@ -16,18 +16,21 @@ if __name__=='__main__':
 
     # Testing character segmentation
 
-    data, labels, errors = get_char_images('scanned', 'text', 1, 2)
-    print(len(labels), len(errors))
-    seg_accuracy = (100 * len(labels)) // (len(labels) + len(errors))
+    data, labels, errors = get_char_images('scanned', 'text', 0, 20)
+    errorCount = 0
+    for _, word, _, _ in errors:
+        errorCount += len(word)
+    print(len(labels), errorCount)
+    seg_accuracy = (100 * len(labels)) // (len(labels) + errorCount)
     print(f'Segmentation Accuracy: {seg_accuracy}')
     
-    for error, line, column in errors:
-        print(error, line, column)
+    # for path, word, line, column in errors:
+    #     print(word, line, column)
 
-    for i in range(len(data)):
-        print(data[i])
-        io.imshow(labels[i])
-        io.show()
+    # for i in range(len(data)):
+    #     print(data[i])
+    #     io.imshow(labels[i])
+    #     io.show()
 
     # Testing feature extraction
 
@@ -46,7 +49,6 @@ if __name__=='__main__':
         words += extract_words_one_line(line)
     
     baseIndex = baseLine(lines[0])
-    print(baseIndex)
     for i in range(15):
         chars = get_char_from_word(words[i], thresholded_lines[0], True)
         chars = remove_strokes(chars, baseIndex)
