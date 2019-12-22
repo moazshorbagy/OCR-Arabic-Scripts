@@ -163,6 +163,22 @@ def cut_extra_height(img):
             break
     return img[count : img.shape[0]-count1 , :]
 
+def cut_extra_width(img):
+    histo = np.sum(img, axis=0)
+    count = 0
+    count1 = 0
+    for i in range(len(histo)):
+        if histo[i] == 0:
+            count +=1
+        else:
+            break
+
+    for i in range(len(histo)-1, 0,-1):
+        if histo[i] == 0:
+            count1 +=1
+        else: 
+            break
+    return img[:,count : img.shape[0]-count1 ]
 
 
 def f_w_over_h(img):
