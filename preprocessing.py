@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import cv2
 import numpy as np
 from skimage.color import rgb2gray
@@ -89,7 +90,7 @@ from time import time
 import skimage.io as io
 import os
 
-enumerated_dict = {
+char_to_int = {
     'ا': 1,
     'ب': 2,
     'ت': 3,
@@ -121,9 +122,37 @@ enumerated_dict = {
     'لا': 29
 }
 
-def map_char(char):
-    return enumerated_dict[char]
-
+int_to_char = (' ',
+    'ا',
+    'ب',
+    'ت',
+    'ث',
+    'ج',
+    'ح',
+    'خ',
+    'د',
+    'ذ',
+    'ر',
+    'ز',
+    'س',
+    'ش',
+    'ص',
+    'ض',
+    'ط',
+    'ظ',
+    'ع',
+    'غ',
+    'ف',
+    'ق',
+    'ك',
+    'ل',
+    'م',
+    'ن',
+    'ه',
+    'و',
+    'ي',
+    'لا'
+)
 
 def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
     imgs = os.listdir(imgs_path)
@@ -135,7 +164,7 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
     data = []
     labels = []
     was = time()
-                
+
     for i in range(start, end):        
         # Getting labels
         path = os.path.join(txt_path, txts[i])
@@ -187,3 +216,41 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
 
     print(f'got {end-start} images in: {int(time() - was)} sec')
     return data, labels, segErrors
+
+def save_predictions(predictions, path):
+    text = ''
+    for prediction in predictions:
+        text += int_to_char[prediction]
+    print(text)
+    with open(path, 'w') as f:
+        f.write(text)
+
+Y = [1, 2, 3, 0, 2, 3]
+save_predictions(Y, 'pred/t1.txt')
+
+def get_char_images_pred(img_path='scanned/capr1.png'):
+    chars = []
+                
+    original = io.imread(img_path)
+
+    deskewed = deskew_1(original)
+
+    lines = get_lines(deskewed)
+    
+    for i in range(len(lines)):
+        lines[i] = thresholding(lines[i])
+
+    linesWithWords = []
+    for line in lines:
+        linesWithWords.append(extract_words_one_line(line))
+
+    for i in range(len(linesWithWords)): # looping on lines
+        for j in range(len(linesWithWords[i])): # looping on words in specific line
+            chars += get_char_from_word(linesWithWords[i][j], lines[i], True)
+
+    return chars
+
+X = get_char_images_pred('scanned/capr2.png')
+for x in X:
+    io.imshow(x)
+    io.show()
