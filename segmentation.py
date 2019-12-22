@@ -110,7 +110,8 @@ def extract_words_one_line(line):
 
         i += 1
 
-    return words
+    words.reverse()
+    return words 
 
 
 # ------------------------- Char Segmentation ----------------------------------
@@ -130,7 +131,6 @@ def maximumTransition(img,baseIndex):
     for i in range(0,baseIndex+1):
         counter=0
         flag=False
-        print(i)
         for j in range(width):
             if img[i,j]==1 and flag==False:
                 counter+=1
@@ -149,6 +149,9 @@ def cutPoints(word,MTI,line,MFV,baseIndex):
     temp=word.shape[1]-1
     while(word[MTI,temp]==0):
         temp-=1
+        if(temp == 0):
+            break
+
     for i in range(temp,0,-1):
         if word[MTI,i]==1 and Flag==False:
             sr.startIndex=i
@@ -225,8 +228,6 @@ def cutPoints(word,MTI,line,MFV,baseIndex):
     char.append(word[:,starting:])
     return char
 
-
-
 def filteration(word,SRL,BaselineIndex,MaxTransitionsIndex,MFV,hist):
 
     filterdCut_1=filterdCut_2=[]
@@ -263,3 +264,15 @@ def filteration(word,SRL,BaselineIndex,MaxTransitionsIndex,MFV,hist):
             i-=1
 
     return filterdCut_1
+
+def get_char_from_word(word, line, isThresholded=False):
+    if(not isThresholded):
+        line = thresholding(line)
+
+    baseIndex = baseLine(line)
+    hist = vertical_histogram(line)
+    MFV = np.bincount(hist[hist!=0].astype('int64')).argmax()
+    MTI = maximumTransition(line, baseIndex)
+    chars = cutPoints(word, MTI, line, MFV, baseIndex)
+    chars.reverse()
+    return chars
