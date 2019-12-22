@@ -7,7 +7,6 @@ from skimage.filters import gaussian, threshold_otsu
 from skimage.feature import canny
 from skimage.transform import probabilistic_hough_line, rotate
 from feature_extraction import f_get_dots, f_get_holes, f_ft, f_multi_lbp, get_features
-from classification import *
 
 # ========== #
 # De-skewing #
@@ -215,7 +214,7 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
             
                 for k in range(len(chars)):
                     labels.append(chars[k])
-                    data.append(map_char(labelWords[currLabelIndex][k]))
+                    data.append(char_to_int[labelWords[currLabelIndex][k]])
 
     print(f'got {end-start} images in: {int(time() - was)} sec')
     # with open('dataset/d')
@@ -230,7 +229,7 @@ def save_predictions(predictions, path):
         f.write(text)
 
 Y = [1, 2, 3, 0, 2, 3]
-save_predictions(Y, 'pred/t1.txt')
+# save_predictions(Y, 'pred/t1.txt')
 
 def get_char_images_pred(img_path='scanned/capr1.png'):
     chars = []
@@ -254,10 +253,10 @@ def get_char_images_pred(img_path='scanned/capr1.png'):
 
     return chars
 
-X = get_char_images_pred('scanned/capr2.png')
-for x in X:
-    io.imshow(x)
-    io.show()
+# X = get_char_images_pred('scanned/capr2.png')
+# for x in X:
+#     io.imshow(x)
+#     io.show()
 
 def save_char_imgs(data, path):
     k = 0
@@ -285,8 +284,7 @@ def save_features(chars_path, start, end):
         for i in range(len(char_imgs)):
             path = os.path.join(chars_path, char_imgs[i])
             char = io.imread(path, as_gray=True)
-            features = get_features(char)
-            print(features)
+            features = get_features(char, True)
             for j in range(len(features)):
                 if j < len(features) - 1:
                     f.write(str(features[j]) + ' ')
