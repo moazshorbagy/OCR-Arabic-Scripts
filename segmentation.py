@@ -232,7 +232,29 @@ def cutPoints(word,MTI,line,MFV,baseIndex):
 def remove_strokes(chars, baseIndex):
     filtered = []
     for char in chars:
-        if(np.any(char[baseIndex+2:, :]) or np.sum(char) > 10 or np.any(char[:baseIndex-4, :]) or char.shape[1] > 7):
+        if(char.shape[1] > 14):
+            v_hist = vertical_histogram(char[:,2:-2])
+            min_value = np.min(v_hist)
+            half = v_hist.shape[0]//2
+            left = np.argwhere(v_hist[:half] == min_value)
+            right = np.argwhere(v_hist[half:] == min_value)
+            _left=-1; _right=-1
+            if(len(left)): _left = half - left[0, 0]
+            if(len(right)): _right = right[0, 0]
+
+            if(_right == -1):
+                cutAt = left[0, 0]
+            elif(_left == -1):
+                cutAt = half + right[0, 0] + 2
+            elif(_left < _right):
+                cutAt = left[0, 0]
+            else:
+                cutAt = half + right[0, 0]
+            
+            filtered.append(char[:, cutAt:])
+            filtered.append(char[:, :cutAt])
+        
+        elif(np.any(char[baseIndex+2:, :]) or np.sum(char) > 16 or np.any(char[:baseIndex-5, :]) or char.shape[1] > 7):
             filtered.append(char)
 
     return filtered
