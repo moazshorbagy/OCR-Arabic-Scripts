@@ -220,13 +220,22 @@ def cutPoints(word,MTI,line,MFV,baseIndex):
             Flag=False
 
     cuts=filteration(word,cuts,baseIndex,MTI,MFV,hist)
-    char=[]
+    chars=[]
     starting=0
     for sr in cuts:
-        char.append(word[:,starting:sr.cutIndex+1])
+        chars.append(word[:,starting:sr.cutIndex+1])
         starting=sr.cutIndex+1
-    char.append(word[:,starting:])
-    return char
+    chars.append(word[:,starting:])
+    #chars = remove_strokes(chars, baseIndex)
+    return chars
+
+def remove_strokes(chars, baseIndex):
+    filtered = []
+    for char in chars:
+        if(np.any(char[baseIndex+2:, :]) or np.sum(char) > 10 or np.any(char[:baseIndex-4, :]) or char.shape[1] > 7):
+            filtered.append(char)
+
+    return filtered
 
 def filteration(word,SRL,BaselineIndex,MaxTransitionsIndex,MFV,hist):
 

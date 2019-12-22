@@ -125,7 +125,7 @@ def map_char(char):
     return enumerated_dict[char]
 
 
-def get_char_images(imgs_path='scanned', txt_path='text', size=1000):
+def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
     imgs = os.listdir(imgs_path)
     txts = os.listdir(txt_path)
     imgs.sort()
@@ -137,7 +137,7 @@ def get_char_images(imgs_path='scanned', txt_path='text', size=1000):
     labels = []
     was = time()
                 
-    for i in range(size):        
+    for i in range(start, end):        
         # Getting labels
         path = os.path.join(txt_path, txts[i])
         with open(path, 'r') as f:
@@ -178,12 +178,12 @@ def get_char_images(imgs_path='scanned', txt_path='text', size=1000):
 
                 # Check for character segmentation error
                 if(len(chars) != len(labelWords[currLabelIndex])):
-                    segErrors.append(labelWords[currLabelIndex])
+                    segErrors.append((labelWords[currLabelIndex], i, j))
                     continue
             
                 for k in range(len(chars)):
                     labels.append(chars[k])
                     data.append(labelWords[currLabelIndex][k])
 
-    print(f'got {size} images in: {int(time() - was)} sec')
+    print(f'got {end-start} images in: {int(time() - was)} sec')
     return data, labels, segErrors
