@@ -3,6 +3,7 @@ import numpy as np
 from scipy.ndimage import label
 from scipy.signal import convolve2d
 import matplotlib.pyplot as plt
+from utility import vertical_histogram, horizontal_histogram
 
 # =================== #
 # Structural features #
@@ -117,6 +118,21 @@ def f_ft(img):
     # ift = np.fft.ifft2(ft).real
     return ft
 
+def f_center_of_mass(char):
+    vh = vertical_histogram(char)
+    columns = range(1,char.shape[1]+1)
+    cm=vh*columns
+
+    hh = horizontal_histogram(char)
+    rows = range(1,char.shape[0]+1)
+    rm=hh*rows
+
+    return int(np.sum(cm)//np.sum(vh)), int(np.sum(rm)//np.sum(hh))
+
+# def f_white_ink_hist(char):
+#     vh = vertical_histogram(char)
+#     hh = horizontal_histogram(char)
+
 # ==================== #
 # Statistical features #
 # ==================== #
@@ -141,6 +157,29 @@ def f_vertical_crossings():
 def f_horizontal_crossings():
     pass
 
+def f_bw_pr(char):
+    w, h = char.shape
+    #region 1
+    upperLeft = char[0 : w // 2, 0 : h // 2]
+    #region 2
+    upperRight = char[w // 2 : w, 0 : h // 2]
+    #region 3
+    lowerLeft= char[0 : w // 2, h // 2 : h]
+    #region 4
+    lowerRight = char[w // 2 : w, h // 2 : h]
+
+    b1w1 = len(np.nonzero(upperLeft)[0])/(upperLeft.size-len(np.nonzero(upperLeft)))
+    b2w2 = len(np.nonzero(upperRight)[0])/(upperRight.size-len(np.nonzero(upperRight)))
+    b3w3 = len(np.nonzero(lowerLeft)[0])/(lowerLeft.size-len(np.nonzero(lowerLeft)))
+    b4w4 = len(np.nonzero(lowerRight)[0])/(lowerRight.size-len(np.nonzero(lowerRight)))
+    b1w2 = len(np.nonzero(upperLeft)[0])/(len(np.nonzero(upperRight)))
+    b3w4 = len(np.nonzero(lowerLeft)[0])/(len(np.nonzero(lowerRight)))
+    b1w3 = len(np.nonzero(upperLeft)[0])/(len(np.nonzero(lowerLeft)))
+    b2w4 = len(np.nonzero(upperRight)[0])/(len(np.nonzero(lowerRight)))
+    b1w4 = len(np.nonzero(upperLeft)[0])/(len(np.nonzero(lowerRight)))
+    b2w3 = len(np.nonzero(upperRight)[0])/(len(np.nonzero(lowerLeft)))
+    return [b1w1, b2w2, b3w3, b4w4, b1w2, b3w4, b1w3, b2w4, b1w4, b2w3]
+
 
 # ==================== #
 #   Get all features   #
@@ -149,7 +188,9 @@ def f_horizontal_crossings():
 def get_features(char, use_ft_lbp=False):
     holes = np.array([f_get_holes(char)])
     dots = np.array([f_get_dots(char)])
-    features = np.concatenate((holes, dots))
+    bwr = np.asarray(f_bw_pr(char)).astype(np.uint8)
+    cof = np.asarray(f_center_of_mass(char)).astype(np.uint8)
+    features = np.concatenate((holes, dots, bwr, cof))
     if use_ft_lbp:
         lbp = np.array(f_multi_lbp(char, is_binarized=True, nbins=2))
         # ft = np.array(f_ft(char))
