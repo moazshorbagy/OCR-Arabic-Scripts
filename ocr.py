@@ -1,5 +1,5 @@
-from preprocessing import deskew, thresholding
-from segmentation import *
+from preprocessing import deskew, thresholding, get_char_images
+from segmentation import get_lines, extract_words_one_line, get_char_from_word
 from seg_accuracy import get_total_img_word_seg_acc
 from feature_extraction import f_get_holes, f_get_dots
 from utility import vertical_histogram
@@ -14,35 +14,44 @@ if __name__=='__main__':
 
     # print(acc)
 
+    # Testing character segmentation
+
+    data, labels, errors = get_char_images('scanned', 'text', 1)
+    print(len(labels), len(errors))
+    seg_accuracy = (100 * len(labels)) // (len(labels) + len(errors))
+    print(f'Segmentation Accuracy: {seg_accuracy}')
+    for i in range(len(data)):
+        print(data[i])
+        io.imshow(labels[i])
+        io.show()
+
     # Testing feature extraction
 
-    original = io.imread('../Dataset/scanned/capr1.png', as_gray=True)
+    original = io.imread('scanned/capr1.png', as_gray=True)
 
     deskewed = deskew(original)
 
     lines = get_lines(deskewed)
 
-    words = []
+    thresholded_lines = []
     for line in lines:
-        line = thresholding(line)
+        thresholded_lines.append(thresholding(line))
+    
+    words = []
+    for line in thresholded_lines:
         words += extract_words_one_line(line)
 
     io.imshow(words[0])
     io.show()
 
-    io.imshow(lines[0])
+    io.imshow(thresholded_lines[0])
     io.show()
 
-    lines[0]=thresholding(lines[0])
-    baseIndex = baseLine(lines[0])
-    hist = vertical_histogram(lines[0])
-    MFV = np.bincount(hist[hist!=0].astype('int64')).argmax()
-    MTI= maximumTransition(lines[0],baseIndex)
-    cuts = cutPoints(words[0], MTI, lines[0], MFV, baseIndex)
-    for cut in cuts:
-        io.imshow(cut)
+    chars = get_char_from_word(words[0], thresholded_lines[0], True)
+    
+    for char in chars:
+        io.imshow(char)
         io.show()
-
 
     words1 = []
     for line in lines:
