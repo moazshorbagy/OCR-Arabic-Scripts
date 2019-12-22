@@ -153,7 +153,7 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
 
         original = io.imread(path)
 
-        deskewed = deskew(original)
+        deskewed = deskew_1(original)
 
         lines = get_lines(deskewed)
         
