@@ -151,7 +151,7 @@ def get_features(char, use_ft_lbp=False):
     dots = np.array([f_get_dots(char)])
     features = np.concatenate((holes, dots))
     if use_ft_lbp:
-        lbp = np.array(f_multi_lbp(char, is_binarized=True, nbins=10))
-        ft = np.array(f_ft(char))
-        features = np.concatenate((features, ft, lbp))
+        lbp = np.array(f_multi_lbp(char, is_binarized=True, nbins=2))
+        # ft = np.array(f_ft(char))
+        features = np.concatenate((features, lbp))
     return features
