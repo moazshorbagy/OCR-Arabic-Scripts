@@ -226,7 +226,7 @@ def cutPoints(word,MTI,line,MFV,baseIndex):
         chars.append(word[:,starting:sr.cutIndex+1])
         starting=sr.cutIndex+1
     chars.append(word[:,starting:])
-    #chars = remove_strokes(chars, baseIndex)
+    chars = remove_strokes(chars, baseIndex)
     return chars
 
 def remove_strokes(chars, baseIndex):
