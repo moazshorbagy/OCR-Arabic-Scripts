@@ -213,8 +213,8 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
                     continue
             
                 for k in range(len(chars)):
-                    labels.append(chars[k])
-                    data.append(char_to_int[labelWords[currLabelIndex][k]])
+                    data.append(chars[k])
+                    labels.append(char_to_int[labelWords[currLabelIndex][k]])
 
     print(f'got {end-start} images in: {int(time() - was)} sec')
     # with open('dataset/d')
@@ -232,7 +232,7 @@ Y = [1, 2, 3, 0, 2, 3]
 # save_predictions(Y, 'pred/t1.txt')
 
 def get_char_images_pred(img_path='scanned/capr1.png'):
-    chars = []
+    words = []
                 
     original = io.imread(img_path)
 
@@ -249,9 +249,9 @@ def get_char_images_pred(img_path='scanned/capr1.png'):
 
     for i in range(len(linesWithWords)): # looping on lines
         for j in range(len(linesWithWords[i])): # looping on words in specific line
-            chars += get_char_from_word(linesWithWords[i][j], lines[i], True)
+            wrods.append(get_char_from_word(linesWithWords[i][j], lines[i], True))
 
-    return chars
+    return words
 
 # X = get_char_images_pred('scanned/capr2.png')
 # for x in X:
@@ -261,7 +261,8 @@ def get_char_images_pred(img_path='scanned/capr1.png'):
 def save_char_imgs(data, path):
     k = 0
     for char in data:
-        io.imsave(path + '/capr' + str(k) + '.png', char/1.0)
+        char = np.asarray(char * 255).astype(np.uint8)
+        io.imsave(path + '/capr' + str(k) + '.png', char)
         k += 1
 
 def save_labels(labels):
@@ -275,22 +276,16 @@ def save_labels(labels):
 # Returns features array NxM and labels Nx1
 # N = number of data
 # M = number of features
-def save_features(chars_path, start, end):
-    # get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000)
-    char_imgs = os.listdir(chars_path)
-    char_imgs.sort()
+def save_features(features):
     features_path = 'features.txt'
     with open(features_path, 'w') as f:
-        for i in range(len(char_imgs)):
-            path = os.path.join(chars_path, char_imgs[i])
-            char = io.imread(path, as_gray=True)
-            features = get_features(char, True)
-            for j in range(len(features)):
-                if j < len(features) - 1:
-                    f.write(str(features[j]) + ' ')
+        for i in range(len(features)):
+            for j in range(len(features[i])):
+                if j < len(features[i]) - 1:
+                    f.write(str(features[i][j]) + ' ')
                 else:
-                    f.write(str(features[j]))
-            if i < len(char_imgs) - 1:
+                    f.write(str(features[i][j]))
+            if i < len(features) - 1:
                 f.write('\n')
 
 
