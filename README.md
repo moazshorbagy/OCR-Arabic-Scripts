@@ -22,6 +22,8 @@ A dataset of images and its ground truth text was obtained from the Watan-2004 A
 - numpy
 - opencv
 - skimage
+- scipy
+- matplotlib
 
 #### Run the Project
-`$ python3 ./run.py`
+`$ python3 ./ocr.py`
