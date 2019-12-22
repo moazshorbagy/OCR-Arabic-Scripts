@@ -311,6 +311,35 @@ def get_char_from_word(word, line, isThresholded=False):
 ############################################################
 
 
+def check_horizontal(new):
+    
+
+    histo = np.sum(new, axis=1)
+
+    
+    first = False
+    second = False
+    counter = 0
+    
+    valid = False
+    
+    for i in range(len(histo)):
+        
+        if first == False and histo[i] != 0 :
+            first = True
+            counter += 1
+        
+        if first == True and histo[i] == 0 :
+            second = True
+        
+        if second == True and histo[i] != 0 and histo[i-1] == 0:
+            valid = True
+            counter +=1
+    
+
+    return valid 
+
+
 
 def detect_seen(img ):
 
@@ -332,7 +361,7 @@ def detect_seen(img ):
     ]
     
     middleofWord_SE2 = [
-
+  
         [1,1,1,0,0,1,1,0,0,1,1],
         [1,0,1,1,1,0,0,1,1,0,0],
 
@@ -340,8 +369,7 @@ def detect_seen(img ):
     ]
 
     middleofWord_SE3 = [
-        #[0,1,0,0,0,1,1,0,0,0,1],
-        #[0,1,x,0,0,1,1,0,0,0,1],
+ 
         [1,1,1,0,0,1,1,0,0,1,0],
         [1,0,1,1,1,0,1,1,1,1,0],
 
@@ -353,7 +381,7 @@ def detect_seen(img ):
 
     ]
     middleofWord_SE5 = [
-
+  
         [1,1,1,0,0,1,1,0,0,1,0],
         [1,0,1,1,1,0,1,1,1,1,1],
 
@@ -404,6 +432,7 @@ def detect_seen(img ):
 
     locations  = [] 
     images = []
+    characters = []
     if valid == True:
 
         loc = 0
@@ -421,6 +450,12 @@ def detect_seen(img ):
         for i in range(len(start)):
 
                 images.append(np.copy(new[:,start[i]:end[i]]))
+                valid  = check_horizontal(new[:,start[i]:end[i]])
+                if valid == True:
+                    characters.append (1)
+                else:
+                    characters.append(0)
+
                 locations.append(loc)
                 loc+=1
 
@@ -438,6 +473,11 @@ def detect_seen(img ):
 
 
 
-    return images , locations 
+    return images , locations , characters 
+	#images list of images cut if found seen else the image itself
+	#locations contaion locations of seen or sheen in the images list
+	#characters contain the type of seen or sheen 
+	# seen  => 0
+	# sheen => 1
 
 #################################################################	
