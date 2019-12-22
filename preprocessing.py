@@ -79,3 +79,111 @@ def thresholding(img, thresh=None):
     binary[img < thresh] = 1
     binary[img >= thresh] = 0
     return binary
+
+# ============= #
+# Fetching Data #
+# ============= #
+
+from segmentation import get_lines, extract_words_one_line, get_char_from_word
+from time import time
+import skimage.io as io
+import os
+
+enumerated_dict = {
+    'ا': 1,
+    'ب': 2,
+    'ت': 3,
+    'ث': 4,
+    'ج': 5,
+    'ح': 6,
+    'خ': 7,
+    'د': 8,
+    'ذ': 9,
+    'ر': 10,
+    'ز': 11,
+    'س': 12,
+    'ش': 13,
+    'ص': 14,
+    'ض': 15,
+    'ط': 16,
+    'ظ': 17,
+    'ع': 18,
+    'غ': 19,
+    'ف': 20,
+    'ق': 21,
+    'ك': 22,
+    'ل': 23,
+    'م': 24,
+    'ن': 25,
+    'ه': 26,
+    'و': 27,
+    'ي': 28,
+    'لا': 29
+}
+
+def map_char(char):
+    return enumerated_dict[char]
+
+
+def get_char_images(imgs_path='scanned', txt_path='text', size=1000):
+    imgs = os.listdir(imgs_path)
+    txts = os.listdir(txt_path)
+    imgs.sort()
+    txts.sort()
+
+    segErrors = []
+    labelWords = []
+    data = []
+    labels = []
+    was = time()
+                
+    for i in range(size):        
+        # Getting labels
+        path = os.path.join(txt_path, txts[i])
+        with open(path, 'r') as f:
+            words = f.read().split(' ')
+            for word in words:
+                labelWords.append(word)
+        
+        # Getting images
+        path = os.path.join(imgs_path, imgs[i])
+
+        original = io.imread(path)
+
+        deskewed = deskew(original)
+
+        lines = get_lines(deskewed)
+        
+        thresholded_lines = []
+        for line in lines:
+            thresholded_lines.append(thresholding(line))
+
+        linesWithWords = []
+        lengthOfWords = 0
+        for line in thresholded_lines:
+            wordsFromLine = extract_words_one_line(line)
+            linesWithWords.append(wordsFromLine)
+            lengthOfWords += len(wordsFromLine)
+
+        # Check for word segmentation error
+        if(lengthOfWords != len(labelWords)):
+            print(f'skipping {path}')
+            continue
+        
+        currLabelIndex = -1
+        for i in range(len(linesWithWords)): # looping on lines
+            for j in range(len(linesWithWords[i])): # looping on words in specific line
+                currLabelIndex += 1
+                chars = get_char_from_word(linesWithWords[i][j], thresholded_lines[i], True)
+
+                # Check for character segmentation error
+                if(len(chars) != len(labelWords[currLabelIndex])):
+                    segErrors.append(labelWords[currLabelIndex])
+                    continue
+            
+                for k in range(len(chars)):
+                    labels.append(chars[k])
+                    data.append(labelWords[currLabelIndex][k])
+
+    print(f'got {size} images in: {int(time() - was)} sec')
+    return data, labels, segErrors
