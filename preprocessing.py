@@ -211,7 +211,7 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
                 lamAlefCount = 0
                 lamAlefIdx = []
                 for l in range(len(linesWithWords[i][j]) - 1):
-                    if(linesWithWords[i][j][l] == 'ل' and linesWithWords[i][j][l] == 'ا'):
+                    if(linesWithWords[i][j][l] == 'ل' and linesWithWords[i][j][l+1] == 'ا'):
                         lamAlefCount += 1
                         lamAlefIdx.append(l)
                         break
