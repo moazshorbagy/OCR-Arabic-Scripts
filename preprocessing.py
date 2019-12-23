@@ -207,15 +207,26 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
             for j in range(len(linesWithWords[i])): # looping on words in specific line
                 currLabelIndex += 1
                 chars = get_char_from_word(linesWithWords[i][j], thresholded_lines[i], True)
-
+                
+                lamAlefCount = 0
+                lamAlefIdx = []
+                for l in range(len(linesWithWords[i][j]) - 1):
+                    if(linesWithWords[i][j][l] == 'ل' and linesWithWords[i][j][l] == 'ا'):
+                        lamAlefCount += 1
+                        lamAlefIdx.append(l)
+                        break
+                
                 # Check for character segmentation error
-                if(len(chars) != len(labelWords[currLabelIndex])):
+                if(len(chars) != len(labelWords[currLabelIndex]) - lamAlefCount):
                     segErrors.append((path, labelWords[currLabelIndex], i, j))
                     continue
                 word_lengths.append(len(chars))
                 for k in range(len(chars)):
                     data.append(chars[k])
-                    labels.append(char_to_int[labelWords[currLabelIndex][k]])
+                    if len(lamAlefCount) != 0 and k == lamAlefIdx[0]:
+                        labels.append(char_to_int['لا'])
+                    else:
+                        labels.append(char_to_int[labelWords[currLabelIndex][k]])
 
     print(f'got {end-start} images in: {int(time() - was)} sec')
     # with open('dataset/d')
