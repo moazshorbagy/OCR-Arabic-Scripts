@@ -137,13 +137,20 @@ def f_center_of_mass(char):
 # Statistical features #
 # ==================== #
 
-
-def f_norm_vertical_hist(word):
-    pass
+import skimage.io as io
+dim = (15, 25)
+def f_norm_vertical_hist(char):
+    char = cv2.resize(char, dim, interpolation=cv2.INTER_AREA)
+    io.imshow(char)
+    io.show()
+    return np.sum(char, axis=0)
 
 
 def f_norm_horizontal_hist(word):
-    pass
+    char = cv2.resize(char, dim, interpolation=cv2.INTER_AREA)
+    io.imshow(char)
+    io.show()
+    return np.sum(char, axis=1)
 
 
 def f_zoning():
