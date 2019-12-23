@@ -3,6 +3,7 @@ from segmentation import get_lines, extract_words_one_line, get_char_from_word, 
 from seg_accuracy import get_total_img_word_seg_acc
 from feature_extraction import f_get_holes, f_get_dots, f_center_of_mass
 from utility import vertical_histogram
+from sklearn.preprocessing import StandardScaler
 import skimage.io as io
 import numpy as np
 from classification import *
@@ -16,12 +17,14 @@ if __name__=='__main__':
     was = time()
     if flag:
         model=load_model(modelPath)
+        scaler=load_model("Scaler.sav")
         words = get_char_images_pred(image)
         X_test=[]
         for word in words:
             for char in word:
                 X_test.append(get_features(char, False))
-        
+        X_test=scaler.transform(X_test)
+
     else:
         data, labels, errors, words_lengths = get_char_images('verification/scanned', 'verification/text', 0, 200)
         features = []
@@ -32,6 +35,10 @@ if __name__=='__main__':
         # labels = np.asarray(labels)
         # print(data.shape)
         # print(labels.shape)
+        scaler = StandardScaler()
+        scaler.fit(features)
+        features=scaler.transform(features)
+        save_model(scaler,"Scaler.sav")
         model = build_model(features,labels)
         save_model(model,modelPath)
 
