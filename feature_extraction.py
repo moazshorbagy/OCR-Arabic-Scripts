@@ -259,9 +259,9 @@ def f_bw_pr(char):
 def get_features(char, use_ft_lbp=False):
     holes = np.array([f_get_holes(char)])
     dots = np.array([f_get_dots(char)])
-    bwr = np.asarray(f_bw_pr(char)).astype(np.uint8)
+    # bwr = np.asarray(f_bw_pr(char)).astype(np.uint8)
     cof = np.asarray(f_center_of_mass(char)).astype(np.uint8)
-    features = np.concatenate((holes, dots, bwr, cof))
+    features = np.concatenate((holes, dots, cof))
     if use_ft_lbp:
         lbp = np.array(f_multi_lbp(char, is_binarized=True, nbins=2))
         # ft = np.array(f_ft(char))
