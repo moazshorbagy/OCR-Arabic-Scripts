@@ -223,7 +223,7 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
                 word_lengths.append(len(chars))
                 for k in range(len(chars)):
                     data.append(chars[k])
-                    if len(lamAlefCount) != 0 and k == lamAlefIdx[0]:
+                    if len(lamAlefIdx) != 0 and k == lamAlefIdx[0]:
                         labels.append(char_to_int['لا'])
                     else:
                         labels.append(char_to_int[labelWords[currLabelIndex][k]])
