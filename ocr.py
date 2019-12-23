@@ -9,25 +9,37 @@ from classification import *
 
 if __name__=='__main__':
 
-    flag=False
+    flag=True
     modelPath="zaki.sav"
     image="verification/scanned/capr6.png"
     if flag:
         model=load_model(modelPath)
-        chars = get_char_images_pred(image)
+        words = get_char_images_pred(image)
         X_test=[]
-        for char in data:
-            X_test.append(get_features(char, False))
+        for word in words:
+            for char in word:
+                X_test.append(get_features(char, False))
         
     else:
-        data, labels, errors = get_char_images('verification/scanned', 'verification/text', 1, 2)
+        data, labels, errors, words_lengths = get_char_images('verification/scanned', 'verification/text', 0, 10)
         features = []
         for char in data:
             features.append(get_features(char, False))
-        X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size = 0.2, random_state = 0)
-        model = build_model(X_train,y_train)
+        # X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size = 0.2, random_state = 0)
+        # data = np.asarray(data)
+        # labels = np.asarray(labels)
+        # print(data.shape)
+        # print(labels.shape)
+        model = build_model(features,labels)
         save_model(model,modelPath)
 
     predictions = model.predict(X_test)
-    
-    save_predictions(predictions,"test/capr6.txt")
+    new_pred = []
+    current = 0
+    for i in range(len(words)):
+        for j in range(len(words[i])):
+            new_pred.append(predictions[current])
+            current += 1
+        new_pred.append(0)
+    # X_test = np.asarray(X_test)
+    save_predictions(new_pred,"test/capr6.txt")
