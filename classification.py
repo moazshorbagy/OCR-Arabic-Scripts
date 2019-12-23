@@ -5,14 +5,14 @@ from preprocessing import *
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
-data, labels, errors = get_char_images('verification/scanned', 'verification/text', 1, 2)
-save_labels(labels)
-features = []
-for char in data:
-    features.append(get_features(char, False))
-# save_features(features)
+# data, labels, errors = get_char_images('verification/scanned', 'verification/text', 1, 2)
+# save_labels(labels)
+# features = []
+# for char in data:
+#     features.append(get_features(char, False))
+# # save_features(features)
 
-X, Y = load_dataset('features.txt', 'labels.txt')
+# X, Y = load_dataset('features.txt', 'labels.txt')
 
 # def shape_labels(Y, num_classes=29):
 #     labels = []
@@ -47,10 +47,10 @@ pca = PCA(n_components = 20)
 
 from sklearn.model_selection import train_test_split
 # X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size = 0.2, random_state = 0)
-X_train = X[0:4000]
-X_test = X[4000:]
-y_train = Y[0:4000]
-y_test = Y[4000:]
+# X_train = X[0:4000]
+# X_test = X[4000:]
+# y_train = Y[0:4000]
+# y_test = Y[4000:]
 # =========================== #
 # Building Model and Training #
 # =========================== #
@@ -75,7 +75,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score
 import pickle
 def build_model(X_train, y_train):
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15,15), random_state=1, max_iter=10000)
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15,15), random_state=1, max_iter=20000)
     clf.fit(X_train, y_train)
     return clf
 
