@@ -141,15 +141,11 @@ import skimage.io as io
 dim = (15, 25)
 def f_norm_vertical_hist(char):
     char = cv2.resize(char, dim, interpolation=cv2.INTER_AREA)
-    io.imshow(char)
-    io.show()
     return np.sum(char, axis=0)
 
 
-def f_norm_horizontal_hist(word):
+def f_norm_horizontal_hist(char):
     char = cv2.resize(char, dim, interpolation=cv2.INTER_AREA)
-    io.imshow(char)
-    io.show()
     return np.sum(char, axis=1)
 
 
@@ -266,9 +262,18 @@ def f_bw_pr(char):
 def get_features(char, use_ft_lbp=False):
     holes = np.array([f_get_holes(char)])
     dots = np.array([f_get_dots(char)])
+
+    vertical_trans = np.array([f_vertical_transitions(char)])
+    hor_trans = np.array([f_horizontal_transitions(char)])
+
+    w_over_h = np.array([f_w_over_h(char)])
+    bp_over_wp = np.array([f_bpixels_over_wpixels(char)])
+
+    norm_hh = np.asarray(f_norm_horizontal_hist(char))
+    norm_vh = np.asarray(f_norm_vertical_hist(char))
     # bwr = np.asarray(f_bw_pr(char)).astype(np.uint8)
     cof = np.asarray(f_center_of_mass(char)).astype(np.uint8)
-    features = np.concatenate((holes, dots, cof))
+    features = np.concatenate((holes, dots, cof, vertical_trans, hor_trans, w_over_h, bp_over_wp, norm_hh, norm_vh))
     if use_ft_lbp:
         lbp = np.array(f_multi_lbp(char, is_binarized=True, nbins=2))
         # ft = np.array(f_ft(char))
