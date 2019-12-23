@@ -143,15 +143,31 @@ def maximumTransition(img,baseIndex):
             max=counter
     return mtIndex
 
+def segment_word(word, MTI, line, MFV, baseIndex):
+    images, locations, characters = detect_seen(word)
+    
+    
+    chars = []
+    for i in range(len(images)):
+
+        if(i in locations):
+            chars.append(images[i])
+        else:
+            chars += cutPoints(images[i],MTI,line,MFV,baseIndex)
+    
+    return chars
+
+
 def cutPoints(word,MTI,line,MFV,baseIndex):
     Flag=True
     cuts=[]
     hist=vertical_histogram(word)
     temp=word.shape[1]-1
     while(word[MTI,temp]==0):
-        temp-=1
         if(temp == 0):
             break
+        temp-=1
+
 
     for i in range(temp,0,-1):
         if word[MTI,i]==1 and Flag==False:
@@ -233,10 +249,9 @@ def cutPoints(word,MTI,line,MFV,baseIndex):
 def remove_strokes(chars, baseIndex):
     filtered = []
     for char in chars:
-        char = cut_extra_height(char)
         char = cut_extra_width(char)
         if(char.shape[1] > 14):
-            v_hist = vertical_histogram(char[:,2:-2])
+            v_hist = vertical_histogram(char[:,4:-4])
             min_value = np.min(v_hist)
             half = v_hist.shape[0]//2
             left = np.argwhere(v_hist[:half] == min_value)
@@ -246,16 +261,18 @@ def remove_strokes(chars, baseIndex):
             if(len(right)): _right = right[0, 0]
 
             if(_right == -1):
-                cutAt = left[0, 0]
+                cutAt = left[0, 0] + 4
             elif(_left == -1):
-                cutAt = half + right[0, 0] + 2
+                cutAt = half + right[0, 0] + 4
             elif(_left < _right):
-                cutAt = left[0, 0]
+                cutAt = left[0, 0] + 4
             else:
-                cutAt = half + right[0, 0]
+                cutAt = half + right[0, 0] + 4
             
-            filtered.append(char[:, cutAt:])
-            filtered.append(char[:, :cutAt])
+            if(np.sum(char[:, :cutAt]) != 0):
+                filtered.append(char[:, :cutAt])
+            if(np.sum(char[:, cutAt:]) != 0):
+                filtered.append(char[:, cutAt:])
         
         elif(np.any(char[baseIndex+2:, :]) or np.sum(char) > 16 or np.any(char[:baseIndex-5, :]) or char.shape[1] > 7):
             filtered.append(char)
@@ -307,7 +324,7 @@ def get_char_from_word(word, line, isThresholded=False):
     hist = vertical_histogram(line)
     MFV = np.bincount(hist[hist!=0].astype('int64')).argmax()
     MTI = maximumTransition(line, baseIndex)
-    chars = cutPoints(word, MTI, line, MFV, baseIndex)
+    chars = segment_word(word, MTI, line, MFV, baseIndex)
     chars.reverse()
     return chars
 	
@@ -424,7 +441,6 @@ def detect_seen(img ):
                 check5 = False
             
             elif checkend ==True:
-                print('in 3')
                 
                 start.append(j-8)
                 end.append(j + middleofWord_SE.shape[1]-1)
@@ -443,7 +459,6 @@ def detect_seen(img ):
         start.sort()
         end.sort()
 
-        print(start,end)
 
         if start[0] > 1:
             images.append(np.copy(new[:,0:start[0]-1]))
@@ -462,7 +477,7 @@ def detect_seen(img ):
                 locations.append(loc)
                 loc+=1
 
-                if i < len(start)-1:
+                if i < len(start)-1 and  ((start[i+1]-1) - (end[i]+1)) > 1  :
                 
                     if start[i+1] != end[i]+1:
                         images.append(np.copy(new[:,end[i]+1:start[i+1]-1]))
