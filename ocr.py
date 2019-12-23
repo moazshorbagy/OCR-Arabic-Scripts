@@ -11,7 +11,7 @@ if __name__=='__main__':
 
     flag=True
     modelPath="zaki.sav"
-    image="verification/scanned/capr6.png"
+    image="verification/scanned/capr7.png"
     if flag:
         model=load_model(modelPath)
         words = get_char_images_pred(image)
@@ -21,7 +21,7 @@ if __name__=='__main__':
                 X_test.append(get_features(char, False))
         
     else:
-        data, labels, errors, words_lengths = get_char_images('verification/scanned', 'verification/text', 0, 10)
+        data, labels, errors, words_lengths = get_char_images('verification/scanned', 'verification/text', 0, 20)
         features = []
         for char in data:
             features.append(get_features(char, False))
@@ -42,4 +42,4 @@ if __name__=='__main__':
             current += 1
         new_pred.append(0)
     # X_test = np.asarray(X_test)
-    save_predictions(new_pred,"test/capr6.txt")
+    save_predictions(new_pred,"test/capr7.txt")
