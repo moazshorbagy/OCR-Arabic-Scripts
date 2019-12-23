@@ -151,7 +151,6 @@ def segment_word(word, MTI, line, MFV, baseIndex):
     for i in range(len(images)):
 
         if(i in locations):
-            print('in seen')
             chars.append(images[i])
         else:
             chars += cutPoints(images[i],MTI,line,MFV,baseIndex)
@@ -165,9 +164,10 @@ def cutPoints(word,MTI,line,MFV,baseIndex):
     hist=vertical_histogram(word)
     temp=word.shape[1]-1
     while(word[MTI,temp]==0):
-        temp-=1
         if(temp == 0):
             break
+        temp-=1
+
 
     for i in range(temp,0,-1):
         if word[MTI,i]==1 and Flag==False:
@@ -269,7 +269,6 @@ def remove_strokes(chars, baseIndex):
             else:
                 cutAt = half + right[0, 0] + 4
             
-            print(cutAt)
             if(np.sum(char[:, :cutAt]) != 0):
                 filtered.append(char[:, :cutAt])
             if(np.sum(char[:, cutAt:]) != 0):
@@ -442,7 +441,6 @@ def detect_seen(img ):
                 check5 = False
             
             elif checkend ==True:
-                print('in 3')
                 
                 start.append(j-8)
                 end.append(j + middleofWord_SE.shape[1]-1)
@@ -460,7 +458,6 @@ def detect_seen(img ):
         
         start.sort()
         end.sort()
-        print(start, end)
 
 
         if start[0] > 1:
@@ -480,7 +477,7 @@ def detect_seen(img ):
                 locations.append(loc)
                 loc+=1
 
-                if i < len(start)-1:
+                if i < len(start)-1 and  ((start[i+1]-1) - (end[i]+1)) > 1  :
                 
                     if start[i+1] != end[i]+1:
                         images.append(np.copy(new[:,end[i]+1:start[i+1]-1]))
