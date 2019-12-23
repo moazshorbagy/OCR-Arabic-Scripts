@@ -202,6 +202,7 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
             continue
         
         currLabelIndex = -1
+        word_lengths = []
         for i in range(len(linesWithWords)): # looping on lines
             for j in range(len(linesWithWords[i])): # looping on words in specific line
                 currLabelIndex += 1
@@ -211,20 +212,19 @@ def get_char_images(imgs_path='scanned', txt_path='text', start=0, end=1000):
                 if(len(chars) != len(labelWords[currLabelIndex])):
                     segErrors.append((path, labelWords[currLabelIndex], i, j))
                     continue
-            
+                word_lengths.append(len(chars))
                 for k in range(len(chars)):
                     data.append(chars[k])
                     labels.append(char_to_int[labelWords[currLabelIndex][k]])
 
     print(f'got {end-start} images in: {int(time() - was)} sec')
     # with open('dataset/d')
-    return data, labels, segErrors
+    return data, labels, segErrors, word_lengths
 
 def save_predictions(predictions, path):
     text = ''
-    for prediction in predictions:
-        text += int_to_char[prediction]
-    print(text)
+    for char in predictions:
+        text += int_to_char[char]
     with open(path, 'w') as f:
         f.write(text)
 
